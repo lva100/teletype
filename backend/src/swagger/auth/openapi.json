@@ -1,0 +1,85 @@
+{
+	"openapi": "3.0.2",
+	"info": {
+		"title": "JWT Auth",
+		"version": "1.0.0",
+		"description": "JWT authentication app built using Express and MongoDB"
+	},
+	"components": {
+		"securitySchemes": {
+			"basicAuth": {
+				"type": "http",
+				"scheme": "basic"
+			},
+			"bearerAuth": {
+				"type": "http",
+				"scheme": "bearer",
+				"bearerFormat": "JWT"
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "http://localhost:3000/api/auth",
+			"description": "Development server"
+		}
+	],
+	"paths": {
+		"/login": {
+			"post": {
+				"description": "Log in a user",
+				"tags": ["Auth"],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"required": ["email", "password"],
+								"properties": {
+									"email": {
+										"type": "string"
+									},
+									"password": {
+										"type": "string"
+									}
+								},
+								"example": {
+									"email": "johndoe@example.com",
+									"password": "john123"
+								}
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successfully log in user",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"items": {
+										"type": "object",
+										"properties": {
+											"accessToken": {
+												"type": "string"
+											},
+											"refreshToken": {
+												"type": "string"
+											}
+										}
+									},
+									"example": {
+										"accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI7InRlc3RAdGVzdC5jb20iLCJpZCI6IjY5YmE5MTFhN2U2ZGJkYTYwNDQzNTMwMCIsImlhdCI6MTc3MzgzNTQ2MiwiZXhwIjoxNzczODM1NTgyfQ.GnXy7df9bBjD-RoT9v6nwKkvP4R7uIDOPTd6_mw-Nxo",
+										"refreshToken": "9999b9d9-99b9-99f9-99cb-be99be9bf999"
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

@@ -1,41 +1,59 @@
-import mongoose, { Schema, type Document } from 'mongoose'
+import mongoose from 'mongoose'
+import uniqueValidator from 'mongoose-unique-validator'
 
-export interface IUser extends Document {
-	clerkId: string
-	name: string
-	email: string
-	avatar: string
-	createdAt: Date
-	updatedAt: Date
-}
-
-const UserSchema = new Schema<IUser>(
+const userSchema = new mongoose.Schema(
 	{
-		clerkId: {
-			type: String,
-			required: true,
-			unique: true,
-		},
-		name: {
-			type: String,
-			required: true,
-			trim: true,
-		},
 		email: {
 			type: String,
 			required: true,
 			unique: true,
-			lowercase: true,
 			trim: true,
 		},
-		avatar: {
+		password: {
 			type: String,
-			default: '',
+			required: true,
+			trim: true,
+			unique: true,
+		},
+		firstName: {
+			type: String,
+			required: true,
+			trim: true,
+			minLength: [3, 'First Name too short'],
+			maxLength: [50, 'First Name too long'],
+		},
+		lastName: {
+			type: String,
+			required: true,
+			trim: true,
+			minLength: [3, 'Last Name too short'],
+			maxLength: [50, 'Last Name too long'],
+		},
+		avatarUrl: {
+			type: String,
+			required: true,
+			trim: true,
+		},
+		lastLogin: {
+			type: Date,
+			required: true,
+			trim: true,
 		},
 	},
-	{
-		timestamps: true,
-	},
+	{ timestamps: true },
 )
 
-export const User = mongoose.model('User', UserSchema)
+userSchema.set('toJSON', {
+	transform: (document, returnedObject: Partial<any>) => {
+		returnedObject.id = returnedObject._id.toString()
+		delete returnedObject._id
+		delete returnedObject.__v
+		delete returnedObject.password //do not reveal password
+		delete returnedObject.createdAt
+		delete returnedObject.updatedAt
+	},
+})
+
+userSchema.plugin(uniqueValidator)
+
+export default mongoose.model('User', userSchema)

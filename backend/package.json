@@ -9,17 +9,34 @@
 		"build": "bun install"
 	},
 	"devDependencies": {
+		"@types/bcrypt": "^6.0.0",
 		"@types/bun": "latest",
-		"@types/express": "^5.0.6"
+		"@types/express": "^5.0.6",
+		"@types/morgan": "^1.9.10",
+		"@types/passport": "^1.0.17",
+		"@types/passport-http": "^0.3.11",
+		"@types/passport-jwt": "^4.0.1",
+		"@types/swagger-jsdoc": "^6.0.4",
+		"@types/swagger-ui-express": "^4.1.8"
 	},
 	"peerDependencies": {
 		"typescript": "^5"
 	},
 	"dependencies": {
 		"@clerk/express": "^1.7.60",
+		"bcrypt": "^6.0.0",
 		"cors": "^2.8.5",
 		"express": "^5.2.1",
+		"express-validator": "^7.3.1",
 		"mongoose": "^9.0.2",
-		"socket.io": "^4.8.2"
+		"mongoose-unique-validator": "^6.1.0",
+		"morgan": "^1.10.1",
+		"passport": "^0.7.0",
+		"passport-http": "^0.3.0",
+		"passport-jwt": "^4.0.1",
+		"socket.io": "^4.8.2",
+		"swagger-jsdoc": "^6.2.8",
+		"swagger-ui-express": "^5.0.1",
+		"uuid": "^13.0.0"
 	}
 }

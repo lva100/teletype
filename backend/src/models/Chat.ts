@@ -30,4 +30,4 @@ const ChatSchema = new Schema<IChat>(
 	{ timestamps: true },
 )
 
-export const Chat = mongoose.model('Chat', ChatSchema)
+export default mongoose.model('Chat', ChatSchema)

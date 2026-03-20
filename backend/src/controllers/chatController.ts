@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from 'express'
+import { Types } from 'mongoose'
 import Chat from '../models/Chat'
 
 export async function getChats(
@@ -21,7 +22,7 @@ export async function getChats(
 
 			return {
 				_id: chat._id,
-				participant: otherParticipant,
+				participant: otherParticipant ?? null,
 				lastMessage: chat.lastMessage,
 				lastMessageAt: chat.lastMessageAt,
 				createdAt: chat.createdAt,
@@ -42,6 +43,21 @@ export async function getOrCreateChat(
 	try {
 		const userId = req.user?.id
 		const { participantId } = req.params
+
+		if (!participantId) {
+			res.status(400).json({ message: 'Participant ID is requred' })
+			return
+		}
+
+		if (!Types.ObjectId.isValid(participantId.toString())) {
+			res.status(400).json({ message: 'Invalid participant ID' })
+			return
+		}
+
+		if (userId == participantId) {
+			res.status(400).json({ error: 'Cannot create chat with youself' })
+			return
+		}
 
 		//check if chat already exists
 		let chat = await Chat.findOne({

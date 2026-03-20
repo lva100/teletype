@@ -36,9 +36,3 @@ export type RegisterUserDTO = LoginUserDTO & {
 	firstName: string
 	lastName: string
 }
-
-export type ActiveUserDTO = {
-	user: {
-		id: string
-	}
-}

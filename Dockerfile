@@ -5,20 +5,24 @@ WORKDIR /app
 
 # build web frontend
 WORKDIR /app/web
-COPY web/package.json web/bun.lock* ./
-RUN bun install --frozen-lockfile
+# COPY web/package.json web/bun.lock* ./
+COPY web/package.json web/package_lock.json* ./
+# RUN bun install --frozen-lockfile
+RUN npm install
 COPY web/ ./
 
-ARG VITE_CLERK_PUBLISHABLE_KEY
-ENV VITE_CLERK_PUBLISHABLE_KEY=$VITE_CLERK_PUBLISHABLE_KEY
-ARG VITE_API_URL
-ENV VITE_API_URL=$VITE_API_URL
+# ARG VITE_CLERK_PUBLISHABLE_KEY
+# ENV VITE_CLERK_PUBLISHABLE_KEY=$VITE_CLERK_PUBLISHABLE_KEY
+# ARG VITE_API_URL
+# ENV VITE_API_URL=$VITE_API_URL
 RUN bun run build
 
 # install backend dependencies
 WORKDIR /app/backend
-COPY backend/package.json backend/bun.lock* ./
-RUN bun install --frozen-lockfile
+# COPY backend/package.json backend/bun.lock* ./
+COPY backend/package.json backend/package_lock.json ./
+# RUN bun install --frozen-lockfile
+RUN npm install
 COPY backend/ ./
 
 # expose port

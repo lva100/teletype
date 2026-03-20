@@ -11,6 +11,7 @@ import chatRoutes from './routes/chatRoutes'
 import messageRoutes from './routes/messageRoutes'
 import userRoutes from './routes/userRoutes'
 
+import path from 'path'
 import notFoundMiddleware from './middleware/notFound'
 import * as swaggerDocumentAuth from './swagger/auth/openapi.json'
 
@@ -76,5 +77,14 @@ app.use('/api/auth/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocumentAuth))
 
 app.use(errorHandler)
 app.use(notFoundMiddleware)
+
+// serve frontend in production
+if (process.env.NODE_ENV === 'production') {
+	app.use(express.static(path.join(__dirname, '../../web/dist')))
+
+	app.get('/{*any}', (_, res) => {
+		res.sendFile(path.join(__dirname, '../../web/dist/index.html'))
+	})
+}
 
 export default app

@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express'
 import Chat from '../models/Chat'
-import { Message } from '../models/Message'
+import Message from '../models/Message'
 
 export async function getMessages(
 	req: Request,

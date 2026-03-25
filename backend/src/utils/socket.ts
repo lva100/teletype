@@ -1,6 +1,5 @@
-import type { NextFunction, Request, Response } from 'express'
 import { Server as HttpServer } from 'http'
-import passport from 'passport'
+import jwt from 'jsonwebtoken'
 import { Server as SocketServer } from 'socket.io'
 import Chat from '../models/Chat'
 import Message from '../models/Message'
@@ -21,37 +20,29 @@ export const initializeSocket = (httpServer: HttpServer) => {
 		process.env.FRONTEND_URL, // production
 	].filter(Boolean) as string[]
 
+	const secretKey = process.env.SECRET_KEY || ''
+
 	const io = new SocketServer(httpServer, { cors: { origin: allowedOrigins } })
 
-	io.engine.use((req: Request, res: Response, next: NextFunction) => {
-		const isHandshake = req.query.sid == undefined
-		if (isHandshake) {
-			passport.authenticate(['jwt'], { session: false })(req, res, next)
-		} else {
-			next()
-		}
-	})
-
-	// verify socket connection - if the user is authenticated, we will store the user id in the socket
-
 	io.use(async (socket, next) => {
-		//const token = socket.handshake.auth.token // this is what user will send from client
-		const user = socket.request.user
-
-		/*if (!token) return next(new Error('Authentication error'))*/
-
 		try {
-			/*const session = await verifyToken(token, {
-				secretKey: process.env.SECRET_KEY!,
+			const token =
+				socket.handshake.auth.token || socket.handshake.headers.authorization
+
+			if (!token) {
+				return next(new Error('Authentication error: no token provided'))
+			}
+
+			jwt.verify(token, secretKey, (err: any, decoded: any) => {
+				if (err) {
+					return next(new Error('Authentication error: invalid token'))
+				}
+
+				socket.request.user = decoded // Сохраняем данные пользователя
+				// console.log(decoded.id)
+				socket.data.userId = decoded.id
+				next()
 			})
-
-			const clerkId = session.sub
-
-			const user = await User.findOne({ clerkId })
-			if (!user) return next(new Error('User not found'))*/
-
-			socket.data.userId = user._id.toString()
-
 			next()
 		} catch (error: any) {
 			next(new Error(error))
@@ -91,7 +82,7 @@ export const initializeSocket = (httpServer: HttpServer) => {
 
 					const chat = await Chat.findOne({
 						_id: chatId,
-						participants: userId,
+						particiants: userId,
 					})
 
 					if (!chat) {
@@ -115,8 +106,8 @@ export const initializeSocket = (httpServer: HttpServer) => {
 					io.to(`chat:${chatId}`).emit('new-message', message)
 
 					// also emit to participants' personal rooms (for chat list view)
-					for (const participantId of chat.participants) {
-						io.to(`user:${participantId}`).emit('new-message', message)
+					for (const particiantId of chat.particiants) {
+						io.to(`user:${particiantId}`).emit('new-message', message)
 					}
 				} catch (error) {
 					socket.emit('socket-error', { message: 'Failed to send message' })
@@ -138,7 +129,7 @@ export const initializeSocket = (httpServer: HttpServer) => {
 			try {
 				const chat = await Chat.findById(data.chatId)
 				if (chat) {
-					const otherParticipantId = chat.participants.find(
+					const otherParticipantId = chat.particiants.find(
 						(p: any) => p.toString() !== userId,
 					)
 					if (otherParticipantId) {

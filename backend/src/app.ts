@@ -1,3 +1,4 @@
+import cors from 'cors'
 import express from 'express'
 import morgan from 'morgan'
 
@@ -58,6 +59,19 @@ const PORT = process.env.PORT || 3000
 // const openapiSpecification = swaggerJsdoc(swaggerDocument)
 
 const app = express()
+
+const allowedOrigins = [
+	'http://localhost:8081', // expo mobile
+	'http://localhost:5173', // vite web devs
+	process.env.FRONTEND_URL!, // production
+].filter(Boolean)
+
+app.use(
+	cors({
+		origin: allowedOrigins,
+		credentials: true, // allow credentials from client (cookies, authorization headers, etc.)
+	}),
+)
 
 app.get('/health', (req, res) => {
 	res.json({ status: 'ok', message: 'Server is running' })

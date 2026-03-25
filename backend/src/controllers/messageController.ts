@@ -10,9 +10,10 @@ export async function getMessages(
 	try {
 		const userId = req.user?.id
 		const { chatId } = req.params
+		// console.log(userId, chatId)
 		const chat = await Chat.findOne({
 			_id: chatId,
-			participants: chatId,
+			particiants: userId,
 		})
 
 		if (!chat) {

@@ -71,6 +71,7 @@ export async function loginUser(
 		const accessToken = issueAccessToken(payload)
 		const refreshToken = await createRefreshToken(user.id)
 		res.status(200).json({
+			userId: payload.id,
 			accessToken,
 			refreshToken,
 		})

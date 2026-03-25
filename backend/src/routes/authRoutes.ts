@@ -11,10 +11,6 @@ const router = Router()
 
 router.post('/register', userValidationRules, validate, createUser)
 router.post('/login', loginValidationRules, validate, loginUser)
-router.post(
-	'/whoami',
-	passport.authenticate(['jwt'], { session: false }),
-	whoami,
-)
+router.get('/me', passport.authenticate(['jwt'], { session: false }), whoami)
 
 export default router

@@ -1,11 +1,12 @@
 import { formatTime } from '../libs/utils'
 
 export function MessageBubble({ message, currentUser }) {
-	console.log(message, currentUser)
 	const isMe = message.sender?.id === currentUser?.id
 
 	return (
-		<div className={`flex px-90 ${isMe ? 'justify-end' : 'justify-start'}`}>
+		<div
+			className={`flex xl:px-90 lg:px-60 md:px-30 sm:px-1 ${isMe ? 'justify-end' : 'justify-start'}`}
+		>
 			<div
 				className={`max-w-md px-4 py-2.5 rounded-2xl ${
 					isMe

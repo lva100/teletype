@@ -6,14 +6,17 @@ import {
 	createRefreshToken,
 	hashPassword,
 	issueAccessToken,
+	verifyRefreshTokenExpiration,
 } from '../utils/helpers'
 
 import type { NextFunction, Request, Response } from 'express'
+import type { ObjectId } from 'mongoose'
 import type {
 	AuthRequest,
 	LoginUserDTO,
 	RegisterUserDTO,
 } from '../middleware/auth'
+import RefreshToken from '../models/RefreshToken'
 import User from '../models/User'
 
 export async function getMe(req: AuthRequest, res: Response) {
@@ -68,12 +71,35 @@ export async function loginUser(
 			email: user.email,
 			id: user.id,
 		}
+
+		const oldRefreshToken = await RefreshToken.findOne({
+			user: user.id,
+		})
+
+		if (oldRefreshToken) {
+			await RefreshToken.findByIdAndDelete(oldRefreshToken._id).exec()
+		}
+
 		const accessToken = issueAccessToken(payload)
 		const refreshToken = await createRefreshToken(user.id)
+
+		const expireCookie = 7 * 24 * 60 * 60 * 1000
+
+		res.cookie('refreshToken', refreshToken, {
+			maxAge: expireCookie, // срок жизни в мс (1 час)
+			expires: new Date(Date.now() + expireCookie), // абсолютная дата истечения
+			path: '/', // путь, для которого действует куки
+			// domain: 'example.com', // домен (включая поддомены)
+			secure: false, // только HTTPS
+			httpOnly: true, // недоступно через JavaScript (защита от XSS)
+			sameSite: 'lax', // защита от CSRF ('strict', 'lax', 'none')
+			// signed: true, // подпись куки (требуется настройка secret)
+		})
+
 		res.status(200).json({
 			userId: payload.id,
 			accessToken,
-			refreshToken,
+			// refreshToken,
 		})
 	} catch (error) {
 		res.status(500)
@@ -88,40 +114,49 @@ export async function listUsers(req, res) {
 	const users = await User.find({}).exec()
 	return res.status(200).json(users)
 }
-
-async function refreshToken(req, res) {
+*/
+export async function refreshToken(req: Request, res: Response) {
 	const { refreshToken: refreshTokenUUID } = req.body
 
-	const refreshToken = await RefreshToken.findOne({
+	const refreshTokenRaw = await RefreshToken.findOne({
 		token: refreshTokenUUID,
-	}).populate('user')
+	}).populate<{ user: { id: ObjectId; email: string } }>('user', 'email')
 
-	if (!refreshToken) {
+	// console.log(refreshTokenRaw)
+
+	if (!refreshTokenRaw) {
 		return res.status(404).json({ error: 'invalid refresh token' })
 	}
 
-	const isExpired = verifyRefreshTokenExpiration(refreshToken)
+	const rfToken = {
+		token: refreshTokenRaw.token,
+		user: refreshTokenRaw.user?.id.toString() || '',
+		expiryDate: refreshTokenRaw.expiryDate,
+	}
+
+	const isExpired = verifyRefreshTokenExpiration(rfToken)
 
 	if (isExpired) {
-		await RefreshToken.findByIdAndDelete(refreshToken._id).exec()
+		await RefreshToken.findByIdAndDelete(refreshTokenRaw._id).exec()
 		return res.status(403).json({ error: 'Refresh token is expired' })
 	}
 
 	const payload = {
-		email: refreshToken.user.email,
-		id: refreshToken.user.id,
+		email: refreshTokenRaw.user?.email,
+		id: refreshTokenRaw.user?.id,
 	}
-	await RefreshToken.findByIdAndDelete(refreshToken._id).exec()
+	await RefreshToken.findByIdAndDelete(refreshTokenRaw._id).exec()
 
 	const newAccessToken = issueAccessToken(payload)
-	const newRefreshToken = await createRefreshToken(payload.id)
+	const newRefreshToken = await createRefreshToken(payload.id?.toString() || '')
 
 	return res.status(200).json({
 		accessToken: newAccessToken,
 		refreshToken: newRefreshToken,
+		userId: payload.id,
 	})
 }
-
+/*
 async function whoami(req, res) {
 	return res.status(200).json(req.user)
 }

@@ -19,7 +19,7 @@ export async function comparePassword(password: string, hashPassword: string) {
 
 export function issueAccessToken(payload: {}) {
 	return jwt.sign(payload, process.env.SECRET_KEY || '', {
-		expiresIn: '15MINUTES',
+		expiresIn: '1MINUTES',
 	}) //2 mins validity
 }
 

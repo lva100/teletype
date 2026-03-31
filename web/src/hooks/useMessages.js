@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import useAuth from '../hooks/useAuth'
-import api from '../libs/axios'
+import axiosPrivate from './_useAxiosPrivate'
 
 export const useMessages = chatId => {
 	const { auth } = useAuth()
@@ -9,7 +9,7 @@ export const useMessages = chatId => {
 		queryKey: ['messages', chatId],
 		queryFn: async () => {
 			const token = auth.accessToken
-			const res = await api.get(`/messages/chat/${chatId}`, {
+			const res = await axiosPrivate.get(`/messages/chat/${chatId}`, {
 				headers: { Authorization: `Bearer ${token}` },
 			})
 			return res.data

@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 
 import useAuth from './useAuth'
 
-const apiUrl = import.meta.env.VITE_API_BASE_URL
+const apiUrl = import.meta.env.VITE_API_URL + '/api'
 // const apiUrl = window.__ENV__?.API_URL
 
 const useAxiosPrivate = () => {
@@ -35,8 +35,7 @@ const useAxiosPrivate = () => {
 			response => response,
 			async error => {
 				console.log('⚠ Interceptor caught error:', error)
-				const originalRequest = error.config
-
+				const originalRequest = error.confi
 				if (
 					originalRequest.url.includes('/refresh') &&
 					error.response.status === 401
@@ -65,7 +64,7 @@ const useAxiosPrivate = () => {
 
 					return new Promise((resolve, reject) => {
 						axiosAuth
-							.post('/refresh')
+							.post('/refresh-token')
 							.then(() => {
 								processQueue(null)
 

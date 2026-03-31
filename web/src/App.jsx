@@ -3,15 +3,17 @@ import './App.css'
 import Login from './components/Login'
 import PageLoader from './components/PageLoader'
 import Register from './components/Register'
-import useAuth from './hooks/useAuth'
+// import useAuth from './hooks/useAuth'
+import { useCurrentUser } from './hooks/useCurrentUser'
 import ChatPage from './pages/ChatPage'
 import HomePage from './pages/HomePage'
 
 function App() {
-	const { auth } = useAuth()
+	// const { auth } = useAuth()
+	const { data: currentUser } = useCurrentUser()
 	// const auth = true
 	const isLoaded = true
-	// const isSignedIn = false
+	const isSignedIn = currentUser ? true : false
 	// console.log(auth)
 
 	if (!isLoaded) return <PageLoader />
@@ -19,11 +21,11 @@ function App() {
 		<Routes>
 			<Route
 				path='/'
-				element={!auth ? <HomePage /> : <Navigate to={'/chat'} />}
+				element={!isSignedIn ? <HomePage /> : <Navigate to={'/chat'} />}
 			/>
 			<Route
 				path='/chat'
-				element={auth ? <ChatPage /> : <Navigate to={'/'} />}
+				element={isSignedIn ? <ChatPage /> : <Navigate to={'/'} />}
 			/>
 			<Route path='/login' element={<Login />} />
 			<Route path='/register' element={<Register />} />

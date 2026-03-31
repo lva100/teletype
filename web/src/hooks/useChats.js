@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import useAuth from '../hooks/useAuth'
-import api from '../libs/axios'
+import axiosPrivate from './_useAxiosPrivate'
 
 export const useChats = () => {
 	const { auth } = useAuth()
@@ -9,7 +9,7 @@ export const useChats = () => {
 		queryKey: ['chats'],
 		queryFn: async () => {
 			const token = auth.accessToken
-			const res = await api.get('/chats', {
+			const res = await axiosPrivate.get('/chats', {
 				headers: { Authorization: `Bearer ${token}` },
 			})
 			return res.data
@@ -24,7 +24,7 @@ export const useGetOrCreateChat = () => {
 	return useMutation({
 		mutationFn: async particiantId => {
 			const token = auth.accessToken
-			const res = await api.post(
+			const res = await axiosPrivate.post(
 				`/chats/with/${particiantId}`,
 				{},
 				{ headers: { Authorization: `Bearer ${token}` } },

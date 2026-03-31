@@ -7,6 +7,6 @@ const router = Router()
 router.use(passport.authenticate(['jwt'], { session: false }))
 
 router.get('/', getChats)
-router.post('/with/particiantId:', getOrCreateChat)
+router.post('/with/:particiantId', getOrCreateChat)
 
 export default router

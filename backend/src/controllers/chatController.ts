@@ -10,19 +10,19 @@ export async function getChats(
 	try {
 		const userId = req.user?.id
 
-		const chats = await Chat.find({ participants: userId })
-			.populate('participants', 'firstName lastName email avatarUrl')
+		const chats = await Chat.find({ particiants: userId })
+			.populate('particiants', 'firstName lastName email avatarUrl')
 			.populate('lastMessage')
 			.sort({ lastMessageAt: -1 })
 
 		const formattedChats = chats.map(chat => {
-			const otherParticipant = chat.participants.find(
+			const otherParticiant = chat.particiants.find(
 				p => p._id.toString() != userId,
 			)
 
 			return {
 				_id: chat._id,
-				participant: otherParticipant ?? null,
+				participant: otherParticiant ?? null,
 				lastMessage: chat.lastMessage,
 				lastMessageAt: chat.lastMessageAt,
 				createdAt: chat.createdAt,
@@ -42,44 +42,45 @@ export async function getOrCreateChat(
 ) {
 	try {
 		const userId = req.user?.id
-		const { participantId } = req.params
 
-		if (!participantId) {
+		const { particiantId } = req.params
+
+		if (!particiantId) {
 			res.status(400).json({ message: 'Participant ID is requred' })
 			return
 		}
 
-		if (!Types.ObjectId.isValid(participantId.toString())) {
+		if (!Types.ObjectId.isValid(particiantId.toString())) {
 			res.status(400).json({ message: 'Invalid participant ID' })
 			return
 		}
 
-		if (userId == participantId) {
+		if (userId == particiantId) {
 			res.status(400).json({ error: 'Cannot create chat with youself' })
 			return
 		}
 
 		//check if chat already exists
 		let chat = await Chat.findOne({
-			participants: { $all: [userId, participantId] },
+			particiants: { $all: [userId, particiantId] },
 		})
 			.populate('participants', 'firstName lastName email avatarUrl')
 			.populate('lastMessage')
 
 		if (!chat) {
-			const newChat = new Chat({ participants: [userId, participantId] })
+			const newChat = new Chat({ particiants: [userId, particiantId] })
 			await newChat.save()
 			chat = await newChat.populate(
-				'participants',
+				'particiants',
 				'firstName lastName email avatarUrl',
 			)
 		}
-		const otherParticipant = chat.participants.find(
+		const otherParticiant = chat.particiants.find(
 			p => p._id.toString() != userId,
 		)
 		res.json({
 			_id: chat._id,
-			participant: otherParticipant ?? null,
+			participant: otherParticiant ?? null,
 			lastMessage: chat.lastMessage,
 			lastMessageAt: chat.lastMessageAt,
 			createdAt: chat.createdAt,

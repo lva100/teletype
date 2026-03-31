@@ -5,6 +5,8 @@ import RefreshToken from '../models/RefreshToken'
 
 const saltRounds = 10
 
+jwt.verify
+
 export async function hashPassword(password: string) {
 	const salt = await bcrypt.genSalt(saltRounds)
 	const passwordHash = await bcrypt.hash(password, salt)
@@ -16,7 +18,9 @@ export async function comparePassword(password: string, hashPassword: string) {
 }
 
 export function issueAccessToken(payload: {}) {
-	return jwt.sign(payload, process.env.SECRET_KEY || '', { expiresIn: 60 * 5 }) //2 mins validity
+	return jwt.sign(payload, process.env.SECRET_KEY || '', {
+		expiresIn: '1MINUTES',
+	}) //2 mins validity
 }
 
 export async function createRefreshToken(userId: string) {
